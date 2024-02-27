@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useTransition } from "react";
 import CardWrapper from "./card-wrapper";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,8 +18,12 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { FormError } from "../form-error";
 import { FormSuccess } from "../form-success";
+import { login } from "@/actions/login";
 
 const LoginForm = () => {
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | undefined>("");
+  const [success, setSuccess] = useState<string | undefined>("");
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
@@ -29,7 +33,17 @@ const LoginForm = () => {
   });
 
   const onSubmit = (values: z.infer<typeof LoginSchema>) => {
-    console.log(values);
+    setError("");
+    setSuccess("");
+    // we are using transtion to make action
+    // such that while status is pending
+    // it should disable the inputs and button
+    startTransition(() => {
+      login(values).then((data) => {
+        setError(data.error);
+        setSuccess(data.success);
+      });
+    });
   };
 
   return (
@@ -43,6 +57,7 @@ const LoginForm = () => {
         <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
           <div className="space-y-4">
             <FormField
+              disabled={isPending}
               control={form.control}
               name="email"
               render={({ field }) => (
@@ -60,6 +75,7 @@ const LoginForm = () => {
               )}
             />
             <FormField
+              disabled={isPending}
               control={form.control}
               name="password"
               render={({ field }) => (
@@ -77,9 +93,11 @@ const LoginForm = () => {
               )}
             />
           </div>
-          <FormError message="" />
-          <FormSuccess message="" />
-          <Button className="w-full">Login</Button>
+          <FormError message={error} />
+          <FormSuccess message={success} />
+          <Button disabled={isPending} className="w-full">
+            Login
+          </Button>
         </form>
       </Form>
     </CardWrapper>

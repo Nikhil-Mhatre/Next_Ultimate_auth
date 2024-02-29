@@ -13,15 +13,15 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     return { error: "Invalid Field!" };
   }
 
+  // TODO: Sending an confirmation Email
   // return { success: "Email Sent!" };
   const { email, password } = validatedFields.data;
-  console.log(validatedFields.data);
 
   try {
     await signIn("credentials", {
       email,
       password,
-      redirectTo: "/settings",
+      redirectTo: DEFAULT_LOGIN_REDIRECT,
     });
   } catch (error) {
     if (error instanceof AuthError) {

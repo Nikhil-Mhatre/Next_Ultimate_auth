@@ -85,7 +85,8 @@ const LoginForm = () => {
                     <Input
                       {...field}
                       placeholder="***********"
-                      type="password"
+                      // TODO: Show Password Feature
+                      type="text"
                     />
                   </FormControl>
                   <FormMessage />

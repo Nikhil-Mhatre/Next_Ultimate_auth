@@ -15,8 +15,21 @@ export const {
   signIn, // This use to signin the user
   signOut, // This is use to signout the user globally
 } = NextAuth({
+  pages: {
+    signIn: "/auth/login",
+    error: "auth/login",
+  },
+  events: {
+    async linkAccount({ user, account }) {
+      console.log("🔗Account is Going to Linked🔗");
+
+      await prismadb.user.update({
+        where: { id: user.id },
+        data: { emailVerified: new Date() },
+      });
+    },
+  },
   callbacks: {
-   
     async session({ token, session }) {
       /** Here we are extending session object by
        * including token.sub field to ensure that

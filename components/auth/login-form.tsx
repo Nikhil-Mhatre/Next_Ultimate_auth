@@ -40,8 +40,8 @@ const LoginForm = () => {
     // it should disable the inputs and button
     startTransition(() => {
       login(values).then((data) => {
-        setError(data.error);
-        setSuccess(data.success);
+        setError(data?.error);
+        // setSuccess(data?.success);
       });
     });
   };

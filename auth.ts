@@ -16,10 +16,14 @@ export const {
   signOut, // This is use to signout the user globally
 } = NextAuth({
   pages: {
+    // Automatically redirect to set signin page
     signIn: "/auth/login",
+    // Automatically redirect to set Error page
     error: "auth/login",
   },
   events: {
+    // This event will run whenever the user signup or create
+    // new account
     async linkAccount({ user, account }) {
       console.log("🔗Account is Going to Linked🔗");
 
@@ -30,6 +34,17 @@ export const {
     },
   },
   callbacks: {
+    async signIn({ user, account }) {
+      // Allow OAuth without email Verification
+      if (account?.provider !== "credentials") return true;
+
+      const existingUser = await getUserById(user.id);
+      // Prevent signin email without email verification
+      if (!existingUser?.emailVerified) return false;
+
+      //TODO: Add 2FA check
+      return true;
+    },
     async session({ token, session }) {
       /** Here we are extending session object by
        * including token.sub field to ensure that

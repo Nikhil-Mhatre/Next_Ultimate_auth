@@ -5,6 +5,8 @@ import { LoginSchema } from "@/schemas";
 import { signIn } from "@/auth";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import { AuthError } from "next-auth";
+import { getUserByEmail } from "@/data/user";
+import { generateVerificationToken } from "@/lib/token";
 
 export const login = async (values: z.infer<typeof LoginSchema>) => {
   const validatedFields = LoginSchema.safeParse(values);
@@ -13,9 +15,21 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     return { error: "Invalid Field!" };
   }
 
-  // TODO: Sending an confirmation Email
-  // return { success: "Email Sent!" };
   const { email, password } = validatedFields.data;
+  const existingUser = await getUserByEmail(email);
+  if (!existingUser || !existingUser.email || !existingUser.password) {
+    return { error: "Email Doesn't Exists!" };
+  }
+  // TODO: Sending an confirmation Email
+  if (!existingUser.emailVerified) {
+    const verificationToken = await generateVerificationToken(
+      existingUser.email
+    );
+
+    return { success: "Confirmation Email Sent!" };
+  }
+
+  // TODO: Need to protect Signin API using callback
 
   try {
     await signIn("credentials", {

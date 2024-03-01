@@ -5,6 +5,7 @@ import { RegisterSchema } from "@/schemas";
 import prismadb from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { generateVerificationToken } from "@/lib/token";
+import { sendVerificationEmail } from "@/lib/mail";
 
 export const register = async (values: z.infer<typeof RegisterSchema>) => {
   // server-side field data validation
@@ -34,6 +35,7 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
 
   // TODO: Send Verification token email
   const verificationToken = await generateVerificationToken(email);
+  await sendVerificationEmail(verificationToken.email, verificationToken.token);
   console.log(`Current Time: ${new Date()}`);
   return { success: "Email Sent!" };
 };
